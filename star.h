@@ -13,7 +13,7 @@ Star
 typedef struct
 {
     //ofsets
-    int x, y;
+    float x, y;
 
 }Star;
 

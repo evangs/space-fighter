@@ -20,7 +20,7 @@ Graphics graphics;
 
 #define BORALUSK 1
 
-#define BORALUSK_LEVEL 10
+#define BORALUSK_LEVEL 200
 
 //player dimension
 int PLAYER_WIDTH = 64;
@@ -53,7 +53,7 @@ int MAX_POWERUPS = 5;
 
 int MAX_ALIEN_FRAMES = 4;
 
-int STAR_VELOCITY = 500;
+int STAR_VELOCITY = 400;
 int BULLET_VELOCITY = 400;
 
 //The surfaces
