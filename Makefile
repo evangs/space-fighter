@@ -18,7 +18,7 @@ SpaceFighter: $(srcdir)/main.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS) -Wl,-framework,Cocoa
 
 winSpaceFighter: $(srcdir)/main.c
-	$(CC) -o SpaceFighter.exe $? $(CFLAGS) -lmingw32 $(LIBS)
+	$(CC) -o SpaceFighter.exe spacefighter.o $? $(CFLAGS) -lmingw32 $(LIBS)
 
 clean:
 	rm -f main
