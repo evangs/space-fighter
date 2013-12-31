@@ -27,6 +27,9 @@ typedef struct
     //the enemies
     Enemy* enemies;
 
+    //the space_fighters
+    SpaceFighter* space_fighters;
+
     //boralusk
     Boralusk boralusk;
 
@@ -76,6 +79,15 @@ void GameInit( Game * g )
 		g->enemies[i].y_vel = 40;
 	}
 
+	g->space_fighters = (SpaceFighter *) malloc( 2 * sizeof(SpaceFighter) );
+
+	for( i = 0; i < 2; i++ )
+	{
+		space_fighter_init( &g->space_fighters[i], rand() % graphics.screen_width, (rand() % 200 + 64) * -1, 0 );
+		g->space_fighters[i].y_vel = 30;
+		g->space_fighters[i].x_vel = ( rand() % 41 ) - 20;
+	}
+
 	g->powerups = (Powerup *) malloc( MAX_POWERUPS * sizeof(Powerup) );
 
 	for( i = 0; i < MAX_POWERUPS; i++ )
@@ -83,6 +95,7 @@ void GameInit( Game * g )
 		powerup_init( &g->powerups[i], rand() % graphics.screen_width, (rand() % 200 + 64) * -1, 16, 16, HEALTHPACK );
 		g->powerups[i].is_dead = true;
 	}
+	printf("done init");
 }
 
 int GamePlay( Game * g )
@@ -199,6 +212,32 @@ int GamePlay( Game * g )
 					}
 				}
 			}
+			if( g->player.score < BORALUSK_LEVEL )
+        	{
+	        	int d;
+	        	for( d = 0; d < 2; d++ )
+	        	{
+	        		if( g->space_fighters[d].is_dead )
+	        		{
+	        			int f;
+	        			bool b_alive = false;
+	        			for( f = 0; f < 2; f++ )
+	        			{
+	        				if( g->space_fighters[d].bullets[f].type > -1 )
+	        				{
+	        					b_alive = true;
+	        					break;
+	        				}
+	        			}
+	        			if( !b_alive )
+	        			{
+	               			space_fighter_init( &g->space_fighters[d], rand() % graphics.screen_width, -200, 0 );
+							g->space_fighters[d].y_vel = 30;
+							g->space_fighters[d].x_vel = ( rand() % 41 ) - 20;
+						}
+					}
+				}
+			}
 			//if all enemies are dead spawn the boralusk
 			if( g->boralusk.is_dead )
 			{
@@ -270,6 +309,10 @@ int GamePlay( Game * g )
         	{
         		enemy_move( &g->enemies[i], TimerGetTicks( &delta ), frozen );
         	}
+        	for( i = 0; i < 2; i++ )
+        	{
+        		space_fighter_move( &g->space_fighters[i], TimerGetTicks( &delta ), frozen );
+        	}
 
         	//update the boralusk
         	boralusk_move( &g->boralusk, TimerGetTicks( &delta ) );
@@ -316,6 +359,53 @@ int GamePlay( Game * g )
 										        printf("error playing sfx explode");
 										    }
 				        					explosion_init( &g->explosions[k], g->enemies[j].box.x, g->enemies[j].box.y, 64, 64 );
+				        					break;
+				        				}
+				        			}
+				        		}
+			        		}
+			        	}
+		        	}
+		        }
+	        }
+	        for( i = 0; i < MAX_BULLETS; i++ )
+	        {
+	        	if( g->player.bullets[i].type > -1 )
+	        	{
+		        	int j;
+		        	for( j = 0; j < 2; j++ )
+		        	{
+		        		if( !g->space_fighters[j].is_dead )
+		        		{
+			        		if( check_collision( g->space_fighters[j].box, g->space_fighters[j].bounding_boxes, 1, g->player.bullets[i].box ) )
+			        		{
+			        			g->player.bullets[i].type = -1;
+			        			g->space_fighters[j].hit_points -= 25;
+			        			int l;
+			        			for( l = 0; l < MAX_CLOUDS; l++ )
+			        			{
+			        				if( g->clouds[l].is_dead )
+			        				{
+			        					cloud_init( &g->clouds[l], g->player.bullets[i].box.x - 8, g->player.bullets[i].box.y - 8, 16, 16 );
+			        					break;
+			        				}
+			        			}
+			        			if( g->space_fighters[j].hit_points < 1 )
+			        			{
+				        			g->space_fighters[j].is_dead = true;
+				        			g->player.score += 5;
+				        			
+				        			int k;
+				        			for( k = 0; k < MAX_EXPLOSIONS; k++ )
+				        			{
+				        				if( g->explosions[k].is_dead )
+				        				{
+				        					//play sound effect
+										    if( Mix_PlayChannel( -1, explode, 0 ) == -1 )
+										    {
+										        printf("error playing sfx explode");
+										    }
+				        					explosion_init( &g->explosions[k], g->space_fighters[j].box.x, g->space_fighters[j].box.y, 64, 64 );
 				        					break;
 				        				}
 				        			}
@@ -419,6 +509,54 @@ int GamePlay( Game * g )
 		        }
 		    }
 
+		    //check for collisions between player and enemy bullets
+	        if( g->player.type > -1 )
+	        {
+		        for( i = 0; i < 2; i++ )
+		        {
+		        	int j;
+		        	for( j = 0; j < 2; j++ )
+		        	{
+		        		if( g->space_fighters[i].bullets[j].type > -1 )
+		        		{
+			        		if( check_collision( g->player.box, g->player.bounding_boxes, 4, g->space_fighters[i].bullets[j].box ) )
+			        		{
+			        			g->player.hit_points -= 50;
+			        			g->space_fighters[i].bullets[j].type = -1;
+			        			int l;
+			        			for( l = 0; l < MAX_CLOUDS; l++ )
+			        			{
+			        				if( g->clouds[l].is_dead )
+			        				{
+			        					cloud_init( &g->clouds[l], g->space_fighters[i].bullets[j].box.x - 8, g->space_fighters[i].bullets[j].box.y - 8, 16, 16 );
+			        					break;
+			        				}
+			        			}
+			        			if( g->player.hit_points < 1 )
+			        			{
+			        				g->player.type = -1;
+			        				int k;
+				        			for( k = 0; k < MAX_EXPLOSIONS; k++ )
+				        			{
+				        				if( g->explosions[k].is_dead )
+				        				{
+				        					//play sound effect
+										    if( Mix_PlayChannel( -1, explode, 0 ) == -1 )
+										    {
+										        printf("error playing sfx explode");
+										    }
+				        					explosion_init( &g->explosions[k], g->player.box.x, g->player.box.y, 64, 64 );
+				        					quit = true;
+				        					break;
+				        				}
+				        			}
+			        			}
+			        		}
+			        	}
+		        	}
+		        }
+		    }
+
 		    //check for collisions between player and powerups
 	        if( g->player.type > -1 )
 	        {
@@ -457,6 +595,10 @@ int GamePlay( Game * g )
         	for( i = 0; i < 5; i++ )
         	{
         		enemy_show( &g->enemies[i] );
+        	}
+        	for( i = 0; i < 2; i++ )
+        	{
+        		space_fighter_show( &g->space_fighters[i] );
         	}
 
         	//show the boralusk
@@ -629,6 +771,10 @@ void game_clean_up( Game * g )
 	{
 		enemy_clean_up( &g->enemies[i] );
 	}
+	for(i = 0; i < 2; i++)
+	{
+		space_fighter_clean_up( &g->space_fighters[i] );
+	}
 
 	boralusk_clean_up( &g->boralusk );
 
@@ -636,10 +782,12 @@ void game_clean_up( Game * g )
 	free( g->explosions );
 	free( g->clouds );
 	free( g->enemies );
+	free( g->space_fighters );
 	free( g->powerups );
 	g->stars = NULL;
 	g->explosions = NULL;
 	g->clouds = NULL;
 	g->enemies = NULL;
+	g->space_fighters = NULL;
 	g->powerups = NULL;   
 }

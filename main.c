@@ -29,6 +29,7 @@
 #include "player.h"
 #include "boralusk.h"
 #include "enemy.h"
+#include "alien_fighter.h"
 #include "collision.h"
 #include "game.h"
 #include "splash_screen.h"
@@ -143,6 +144,7 @@ bool load_files()
     bullet = load_image( "Space Fighter.app/Contents/Resources/bullet.png" );
     enemy_bullet = load_image( "Space Fighter.app/Contents/Resources/enemy_bullet.png" );
     sprite_sheet = load_image( "Space Fighter.app/Contents/Resources/spritesheet.png" );
+    alien_fighter = load_image( "Space Fighter.app/Contents/Resources/space_fighter_aeon.png");
     cloud = load_image( "Space Fighter.app/Contents/Resources/dust_cloud.png" );
     shield = load_image( "Space Fighter.app/Contents/Resources/shield.png" );
     healthpack = load_image( "Space Fighter.app/Contents/Resources/healthpack.png" );
@@ -178,7 +180,7 @@ bool load_files()
     }
 
     //If there was a problem in loading the images
-    if( ( player == NULL ) || ( particle == NULL ) || ( star == NULL ) || ( bullet == NULL ) || ( enemy_bullet == NULL ) || ( sprite_sheet == NULL ) || ( cloud == NULL ) || ( shield == NULL ))
+    if( ( player == NULL ) || ( particle == NULL ) || ( star == NULL ) || ( bullet == NULL ) || ( enemy_bullet == NULL ) || ( sprite_sheet == NULL ) || ( alien_fighter == NULL ) || ( cloud == NULL ) || ( shield == NULL ))
     {
         printf( "error loading player\n" );
         return false;
@@ -237,6 +239,7 @@ void clean_up()
     SDL_FreeSurface( bullet );
     SDL_FreeSurface( particle );
     SDL_FreeSurface( sprite_sheet );
+    SDL_FreeSurface( alien_fighter );
     SDL_FreeSurface( cloud );
     SDL_FreeSurface( shield );
 

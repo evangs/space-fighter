@@ -73,6 +73,7 @@ SDL_Surface *bullet = NULL;
 SDL_Surface *enemy_bullet = NULL;
 SDL_Surface *particle = NULL;
 SDL_Surface *sprite_sheet = NULL;
+SDL_Surface *alien_fighter = NULL;
 SDL_Surface *cloud = NULL;
 SDL_Surface *score_msg = NULL;
 SDL_Surface *shield = NULL;
